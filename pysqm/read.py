@@ -49,7 +49,7 @@ def relaxed_import(themodule):
     except: pass
 
 relaxed_import('serial')
-relaxed_import('_mysql')
+relaxed_import('mysql.connector')
 relaxed_import('pysqm.email')
 
 '''
@@ -75,7 +75,7 @@ if config._device_type == 'SQM-LE':
 elif config._device_type == 'SQM-LU':
     import serial
 if config._use_mysql == True:
-    import _mysql
+    import mysql.connector
 
 
 def filtered_mean(array,sigma=3):
@@ -282,10 +282,10 @@ class device(observatory):
         data to a database
         '''
         mydb = None
-        values = formatted_data.split(';')
+        values = formatted_data.rstrip().split(';')
         try:
             ''' Start database connection '''
-            mydb = _mysql.connect(\
+            mydb = mysql.connector.connect(\
              host = config._mysql_host,
              user = config._mysql_user,
              passwd = config._mysql_pass,
@@ -293,11 +293,13 @@ class device(observatory):
              port = config._mysql_port)
 
             ''' Insert the data '''
-            mydb.query(\
-             "INSERT INTO "+str(config._mysql_dbtable)+" VALUES (NULL,'"+\
-             values[0]+"','"+values[1]+"',"+\
-             values[2]+","+values[3]+","+\
-             values[4]+","+values[5]+")")
+            mycursor = mydb.cursor()
+            query = "INSERT INTO "+str(config._mysql_dbtable)+" VALUES (NULL,"+\
+             "STR_TO_DATE('"+values[0]+"','%Y-%m-%dT%H:%i:%s.000'),"+\
+             "STR_TO_DATE('"+values[1]+"','%Y-%m-%dT%H:%i:%s.000'),"+\
+             values[2]+","+values[3]+","+values[4]+","+values[5]+")"
+            mycursor.execute(query)
+            mydb.commit()
         except Exception as ex:
             print((str(inspect.stack()[0][2:4][::-1])+\
              ' DB Error. Exception: %s' % str(ex)))

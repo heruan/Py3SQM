@@ -57,7 +57,7 @@ def relaxed_import(themodule):
 
 relaxed_import('socket')
 relaxed_import('serial')
-relaxed_import('_mysql')
+relaxed_import('mysql.connector')
 relaxed_import('pysqm.email')
 
 
@@ -73,7 +73,7 @@ if config._device_type == 'SQM-LE':
 elif config._device_type == 'SQM-LU':
     import serial
 if config._use_mysql == True:
-    import _mysql
+    import mysql.connector
 
 
 # Create directories if needed
